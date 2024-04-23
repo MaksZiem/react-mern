@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Input from "../../shared/components/FormElements/Input";
 import Button from "../../shared/components/FormElements/Button";
@@ -41,20 +41,38 @@ const DUMMY_PLACES = [
 const UpdatePlace = () => {
   const placeId = useParams().placeId;
   const identifiedPlace = DUMMY_PLACES.find((p) => p.id === placeId);
-
-  const [formState, inputHandler] = useForm(
+  const [isLoading, setIsLoading] = useState(true);
+  const [formState, inputHandler, setFormData] = useForm(
     {
       title: {
-        value: identifiedPlace.title,
-        isValid: true,
+        value: "",
+        isValid: false,
       },
       description: {
-        value: identifiedPlace.description,
-        isValid: true,
+        value: "",
+        isValid: false,
       },
     },
-    true
+    false
   );
+
+  // zeby nie bylo infinite loop chuj wie dlaczego suiiii
+  useEffect(() => {
+    setFormData(
+      {
+        title: {
+          value: identifiedPlace.title,
+          isValid: true,
+        },
+        description: {
+          value: identifiedPlace.description,
+          isValid: true,
+        },
+      },
+      true
+    );
+    setIsLoading(false);
+  }, [setFormData, identifiedPlace]);
 
   const placeUpdateSubmitHandler = (event) => {
     event.preventDefault();
@@ -69,7 +87,18 @@ const UpdatePlace = () => {
     );
   }
 
+  //dlatego bo jak wyczyszcze formularz to sie wypierdala
+
+  if (isLoading) {
+    return (
+      <div className="center">
+        <h2>Loading...</h2>
+      </div>
+    );
+  }
+
   return (
+    // formState.inputs.title.value && (
     <form className="place-form" onSubmit={placeUpdateSubmitHandler}>
       <Input
         id="title"
@@ -98,6 +127,7 @@ const UpdatePlace = () => {
       </Button>
     </form>
   );
+  // );
 };
 
 export default UpdatePlace;
